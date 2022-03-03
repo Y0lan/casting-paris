@@ -85,6 +85,7 @@
             const user = supabase.auth.user();
             const updates = {
                 id: user.id,
+                email: user.email,
                 name,
                 surname,
                 birthdate,
@@ -100,8 +101,7 @@
                 details,
                 height,
                 agency,
-                phone,
-                email
+                phone
             }
 
             let {error} = await supabase.from('users').upsert(updates,
