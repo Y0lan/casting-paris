@@ -132,7 +132,7 @@
 <form use:getProfile class="form-widget" on:submit|preventDefault={updateProfile}>
     <div>
         <label for="email">Email</label>
-        <input id="email" type="text" value={$user.email} disabled/>
+        <input id="email" type="text" value={$user.email} bind:value={email} disabled/>
     </div>
     <div>
         <label for="name">Name</label>
