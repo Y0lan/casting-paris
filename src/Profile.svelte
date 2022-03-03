@@ -104,6 +104,28 @@
                 phone
             }
 
+            // check if agency exists
+            
+            let { agency_db, error } = await supabase
+                .from('agency')
+                .select('name')
+                .eq('name', agency)
+                .single()
+
+            
+            if(!agency_db) {
+                try {
+                    let {error} = await supabase
+                    .from('agency')
+                    .insert([
+                                { name: agency}
+                            ])
+                    if(error) throw error
+                    } catch(error){
+                        alert(error.message)
+                    }
+            }
+
             let {error} = await supabase.from('users').upsert(updates,
                 {
                     returning: 'minimal'
