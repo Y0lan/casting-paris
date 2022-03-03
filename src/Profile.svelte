@@ -105,12 +105,18 @@
             }
 
             // check if agency exists
-            
-            let { agency_db, error } = await supabase
+            try {
+                let { agency_db, error } = await supabase
                 .from('agency')
                 .select('name')
                 .eq('name', agency)
                 .single()
+                
+                if(error) throw error
+            } catch(error){
+                alert(error.message)
+            }
+            
 
             
             if(!agency_db) {
