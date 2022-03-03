@@ -232,10 +232,10 @@
     </div>
     <div>
         <label for="details">Details</label>
-        <textarea
+        <input
                 id="details"
                 type="text"
-                bind:value={details}></textarea>
+                bind:value={details}/>
     </div>
     <div>
         <label for="height">Height</label>
