@@ -105,8 +105,10 @@
             }
 
             // check if agency exists
+            let agency_db = null
+            let error = null
             try {
-                let { agency_db, error } = await supabase
+                { agency_db, error } = await supabase
                 .from('agency')
                 .select('name')
                 .eq('name', agency)
@@ -121,7 +123,7 @@
             
             if(!agency_db) {
                 try {
-                    let {error} = await supabase
+                    {error} = await supabase
                     .from('agency')
                     .insert([
                                 { name: agency}
@@ -132,7 +134,7 @@
                     }
             }
 
-            let {error} = await supabase.from('users').upsert(updates,
+            {error} = await supabase.from('users').upsert(updates,
                 {
                     returning: 'minimal'
                 })
