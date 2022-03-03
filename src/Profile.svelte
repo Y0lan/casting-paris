@@ -70,6 +70,7 @@
                 height = data.height;
                 agency = data.agency;
                 phone = data.phone;
+                email = data.email;
             }
         } catch (error) {
             alert(error.message)
@@ -99,7 +100,8 @@
                 details,
                 height,
                 agency,
-                phone
+                phone,
+                email
             }
 
             let {error} = await supabase.from('users').upsert(updates,
