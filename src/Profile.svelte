@@ -1,6 +1,7 @@
 <script>
     import {supabase} from "./supabaseClient";
     import {user} from "./sessionStore";
+    import moment from "moment";
 
     console.log(user)
     let loading = true;
@@ -21,6 +22,7 @@
     let agency = null;
     let phone = null;
     let email = null;
+    let last_casting = null;
 
     async function getProfile() {
         try {
@@ -46,10 +48,13 @@
                  height,
                  agency,
                  phone,
-                 email
+                 email,
+                 last_casting
                  `)
                 .eq('id', user.id)
                 .single()
+
+            data.last_casting = moment(data.last_casting).format('YYYY-MM-DDThh:mm:ss')
 
             if (error && status !== 406) throw error
 
@@ -71,6 +76,7 @@
                 agency = data.agency;
                 phone = data.phone;
                 email = data.email;
+                last_casting = data.last_casting;
             }
         } catch (error) {
             alert(error.message)
@@ -80,6 +86,7 @@
     }
 
     async function updateProfile() {
+        last_casting = moment().format('YYYY-MM-DDThh:mm:ss')
         try {
             loading = true
             const user = supabase.auth.user();
@@ -101,37 +108,37 @@
                 details,
                 height,
                 agency,
-                phone
+                phone,
+                last_casting
             }
 
             // check if agency exists
             let agency_found = null;
             try {
-                let { agency_db, error } = await supabase
-                .from('agency')
-                .select('name')
-                .eq('name', agency)
-                .single()
-                
-                if(error) throw error
+                let {agency_db, error} = await supabase
+                    .from('agency')
+                    .select('name')
+                    .eq('name', agency)
+                    .single()
+
+                if (error) throw error
                 agency_found = agency_db;
-            } catch(error){
+            } catch (error) {
                 alert(error.message)
             }
-            
 
-            
-            if(!agency_found) {
+
+            if (!agency_found) {
                 try {
                     let {error} = await supabase
-                    .from('agency')
-                    .insert([
-                                { name: agency}
-                            ])
-                    if(error) throw error
-                    } catch(error){
-                        alert(error.message)
-                    }
+                        .from('agency')
+                        .insert([
+                            {name: agency}
+                        ])
+                    if (error) throw error
+                } catch (error) {
+                    alert(error.message)
+                }
             }
 
             let {error} = await supabase.from('users').upsert(updates,
@@ -165,29 +172,66 @@
         <input id="email" type="text" value={$user.email} disabled/>
     </div>
     <div>
-        <label for="name">Name</label>
+        <label for="last_casting">Last seen</label>
+        <input id="last_casting" type="datetime-local" value={last_casting} disabled>
+    </div>
+    <div>
+        <label for="name">Name (required)</label>
         <input
                 id="name"
                 type="text"
+                required
                 bind:value={name}
         />
     </div>
     <div>
-        <label for="surname">Surname</label>
+        <label for="surname">Surname (required)</label>
         <input
                 id="surname"
                 type="text"
+                required
                 bind:value={surname}
         />
     </div>
     <div>
-        <label for="birthdate">Date of Birth</label>
+        <label for="birthdate">Date of Birth (required)</label>
         <input
                 id="birthdate"
                 type="date"
+                required
                 bind:value={birthdate}
         />
     </div>
+    <div>
+        <label for="height">Height in cm (required)</label>
+        <input
+                id="height"
+                type="number"
+                required
+                bind:value={height}
+        />
+    </div>
+
+
+    <div>
+        <label for="agency">Agency (required)</label>
+        <input
+                id="agency"
+                type="text"
+                required
+                bind:value={agency}
+        />
+    </div>
+    <div>
+        <label for="phone">Phone (required)</label>
+        <input
+                id="phone"
+                type="tel"
+                required
+                bind:value={phone}
+        />
+    </div>
+
     <div>
         <label for="insta">Instagram</label>
         <input
@@ -221,7 +265,7 @@
         />
     </div>
     <div>
-        <label for="chest_size">Chest size</label>
+        <label for="chest_size">Chest size in cm</label>
         <input
                 id="chest_size"
                 type="number"
@@ -229,7 +273,7 @@
         />
     </div>
     <div>
-        <label for="waist_size">Waist size</label>
+        <label for="waist_size">Waist size in cm</label>
         <input
                 id="waist_size"
                 type="number"
@@ -237,7 +281,7 @@
         />
     </div>
     <div>
-        <label for="hip_size">Hip size</label>
+        <label for="hip_size">Hip size in cm</label>
         <input
                 id="hip_size"
                 type="number"
@@ -267,36 +311,15 @@
                 type="text"
                 bind:value={details}/>
     </div>
-    <div>
-        <label for="height">Height</label>
-        <input
-                id="height"
-                type="number"
-                bind:value={height}
-        />
-    </div>
-    <div>
-        <label for="agency">Agency</label>
-        <input
-                id="agency"
-                type="text"
-                bind:value={agency}
-        />
-    </div>
-    <div>
-        <label for="phone">Phone</label>
-        <input
-                id="phone"
-                type="tel"
-                bind:value={phone}
-        />
-    </div>
 
     <div>
-        <input type="submit" class="button block primary" value={loading ? 'Loading ...' : 'Update'}
+        <input type="submit" class="button block primary" value={loading ? 'Loading ...' : 'Confirm'}
                disabled={loading}/>
     </div>
 
+
+</form>
+<form style="margin-top: 10px">
     <div>
         <button class="button block" on:click={signOut} disabled={loading}>
             Sign Out
