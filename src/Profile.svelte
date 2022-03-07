@@ -22,12 +22,13 @@
     let agency = null;
     let phone = null;
     let email = null;
-    let last_casting = null;
+    let last_seen = null;
 
     async function getProfile() {
         try {
             loading = true;
             const user = supabase.auth.user();
+            last_seen = user.last_sign_in_at
 
             let {data, error, status} = await supabase
                 .from('users')
@@ -48,13 +49,11 @@
                  height,
                  agency,
                  phone,
-                 email,
-                 last_casting
+                 email
                  `)
                 .eq('id', user.id)
                 .single()
 
-            data.last_casting = moment(data.last_casting).format('YYYY-MM-DDThh:mm:ss')
 
             if (error && status !== 406) throw error
 
@@ -76,7 +75,6 @@
                 agency = data.agency;
                 phone = data.phone;
                 email = data.email;
-                last_casting = data.last_casting;
             }
         } catch (error) {
             alert(error.message)
@@ -86,10 +84,10 @@
     }
 
     async function updateProfile() {
-        last_casting = moment().format('YYYY-MM-DDThh:mm:ss')
         try {
             loading = true
             const user = supabase.auth.user();
+            last_seen = user.last_sign_in_at
             const updates = {
                 id: user.id,
                 email: user.email,
@@ -108,8 +106,7 @@
                 details,
                 height,
                 agency,
-                phone,
-                last_casting
+                phone
             }
 
             // check if agency exists
@@ -173,7 +170,7 @@
     </div>
     <div>
         <label for="last_casting">Last seen</label>
-        <input id="last_casting" type="datetime-local" value={last_casting} disabled>
+        <input id="last_casting" type="text" value={moment(last_seen).format('mm/DD/yyyy, hh:mm:ss')} disabled>
     </div>
     <div>
         <label for="name">Name (required)</label>
