@@ -2,8 +2,10 @@
     import {supabase} from "./supabaseClient";
     import {user} from "./sessionStore";
     import moment from "moment";
+    import Select from 'svelte-select';
 
-    console.log(user)
+    const COUNTRIES_NOW_URL = "https://countriesnow.space/api/v0.1/countries"
+
     let loading = true;
     let name = null;
     let surname = null;
@@ -23,8 +25,32 @@
     let phone = null;
     let email = null;
     let last_seen = null;
+    let countries = [];
+    let cities = [];
+    let gender = null;
+    let skin_color = null;
+    let hair_color = null;
+    let city = null;
+    let country = null;
+
+    $: console.log(country)
+
 
     async function getProfile() {
+
+        const json = await fetch(COUNTRIES_NOW_URL)
+            .then(response => response.json())
+            .then(json => json["data"]);
+
+        for (let country in json) {
+            const country_name = json[country]["country"];
+            countries.push(country_name)
+        }
+
+        $: console.log(countries)
+        console.log(cities)
+
+
         try {
             loading = true;
             const user = supabase.auth.user();
@@ -170,7 +196,7 @@
     </div>
     <div>
         <label for="last_casting">Last seen</label>
-        <input id="last_casting" type="text" value={moment(last_seen).format('mm/DD/yyyy, hh:mm:ss')} disabled>
+        <input id="last_casting" type="text" value={moment(last_seen).format('MM/DD/yyyy, hh:mm:ss')} disabled>
     </div>
     <div>
         <label for="name">Name (required)</label>
@@ -218,6 +244,10 @@
                 required
                 bind:value={agency}
         />
+    </div>
+    <div class="themed">
+        <label for="countries">Country (required)</label>
+            <Select id="countries" isMulti=true items={countries} />
     </div>
     <div>
         <label for="phone">Phone (required)</label>
