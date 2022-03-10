@@ -25,9 +25,12 @@
     let phone = null;
     let email = null;
     let last_seen = null;
-    let gender = null;
+    let gender = false;
+    const gender_choice = ["male", "female", "other", "no answer"]
     let skin_color = null;
+    const skin_color_choice = ["black", "white", "mixed"]
     let hair_color = null;
+    const hair_color_choice = ["black", "brown", "blonde", "red", "blue", "purple", "pink"]
     $: countries = [];
     let all_cities = [{}];
     $: cities_filtered = [].concat.apply([], all_cities.map(a => countries.map(k => a[k["value"]]))[0]);
@@ -92,8 +95,7 @@
                 hip_size = data.hip_size;
                 shoe_size = data.shoe_size;
                 eyes_color = data.eyes_color;
-                details = data.details
-                ;
+                details = data.details;
                 height = data.height;
                 agency = data.agency;
                 phone = data.phone;
@@ -221,6 +223,10 @@
                 required
                 bind:value={birthdate}
         />
+    </div>
+    <div>
+        <label for="gender">Gender (required)</label>
+        <Select inputAttributes={{ required: !gender.value }} id="gender" items={gender_choice} value={gender}/>
     </div>
     <div>
         <label for="height">Height in cm (required)</label>
