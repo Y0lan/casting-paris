@@ -25,15 +25,14 @@
     let phone = null;
     let email = null;
     let last_seen = null;
-    let countries = [];
-    let cities = [];
     let gender = null;
     let skin_color = null;
     let hair_color = null;
-    let city = null;
-    let country = null;
-
-    $: console.log(country)
+    $: countries = [];
+    let all_cities = [{}];
+    $: cities_filtered = [].concat.apply([], all_cities.map(a => countries.map(k => a[k["value"]]))[0]);
+    let cities = [];
+    let all_countries = []
 
 
     async function getProfile() {
@@ -44,12 +43,9 @@
 
         for (let country in json) {
             const country_name = json[country]["country"];
-            countries.push(country_name)
+            all_countries.push(country_name)
+            all_cities[0][country_name] = json[country]["cities"]
         }
-
-        $: console.log(countries)
-        console.log(cities)
-
 
         try {
             loading = true;
@@ -96,7 +92,8 @@
                 hip_size = data.hip_size;
                 shoe_size = data.shoe_size;
                 eyes_color = data.eyes_color;
-                details = data.details;
+                details = data.details
+                ;
                 height = data.height;
                 agency = data.agency;
                 phone = data.phone;
@@ -196,7 +193,7 @@
     </div>
     <div>
         <label for="last_casting">Last seen</label>
-        <input id="last_casting" type="text" value={moment(last_seen).format('MM/DD/yyyy, hh:mm:ss')} disabled>
+        <input id="last_casting" type="text" value={moment(last_seen).format('MM/DD/yyyy, HH:mm:ss')} disabled>
     </div>
     <div>
         <label for="name">Name (required)</label>
@@ -245,9 +242,19 @@
                 bind:value={agency}
         />
     </div>
-    <div class="themed">
+    <div> <!-- TODO: fix can't clear field without crashing -->
         <label for="countries">Country (required)</label>
-            <Select id="countries" isMulti=true items={countries} />
+        <Select id="countries"
+                isClearable={false}
+                isMulti=true
+                items={all_countries}
+                bind:value={countries}
+                inputStyles=""/>
+    </div>
+
+    <div>
+        <label for="cities">Cities (required)</label>
+        <Select id="cities" isMulti=true items={cities_filtered} value={cities}/>
     </div>
     <div>
         <label for="phone">Phone (required)</label>
