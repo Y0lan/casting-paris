@@ -25,15 +25,15 @@
     let phone = null;
     let email = null;
     let last_seen = null;
-    let gender = false;
+    let gender = "no answer";
     const gender_choice = ["male", "female", "other", "no answer"]
-    let skin_color = null;
-    const skin_color_choice = ["black", "white", "mixed"]
-    let hair_color = null;
-    const hair_color_choice = ["black", "brown", "blonde", "red", "blue", "purple", "pink"]
-    $: countries = [];
+    let skin_color = "black";
+    const skin_color_choice = ["black", "white", "mixed"].sort()
+    let hair_color = "black"
+    const hair_color_choice = ["black", "brown", "blonde", "red", "blue", "purple", "pink", "others"].sort()
+    $: countries = ["France"];
     let all_cities = [{}];
-    $: cities_filtered = [].concat.apply([], all_cities.map(a => countries.map(k => a[k["value"]]))[0]);
+    $: cities_filtered = [].concat.apply([], all_cities.map(a => countries.map(k => a[k["value"]]))[0]).sort();
     let cities = [];
     let all_countries = []
 
@@ -161,6 +161,7 @@
                 } catch (error) {
                     alert(error.message)
                 }
+
             }
 
             let {error} = await supabase.from('users').upsert(updates,
@@ -226,7 +227,27 @@
     </div>
     <div>
         <label for="gender">Gender (required)</label>
-        <Select inputAttributes={{ required: !gender.value }} id="gender" items={gender_choice} value={gender}/>
+        <Select
+                id="gender"
+                isSearchable="{false}"
+                items="{gender_choice}"
+                bind:value={gender}/>
+    </div>
+    <div>
+        <label for="hair_color">Hair Color (required)</label>
+        <Select
+                id="hair_color"
+                isSearchable="{false}"
+                items="{hair_color_choice}"
+                bind:value={hair_color}/>
+    </div>
+    <div>
+        <label for="skin_color">Skin Color (required)</label>
+        <Select
+                id="skin_color"
+                isSearchable="{false}"
+                items="{skin_color_choice}"
+                bind:value={skin_color}/>
     </div>
     <div>
         <label for="height">Height in cm (required)</label>
@@ -251,6 +272,7 @@
     <div> <!-- TODO: fix can't clear field without crashing -->
         <label for="countries">Country (required)</label>
         <Select id="countries"
+                isRequired
                 isClearable={false}
                 isMulti=true
                 items={all_countries}
@@ -260,7 +282,7 @@
 
     <div>
         <label for="cities">Cities (required)</label>
-        <Select id="cities" isMulti=true items={cities_filtered} value={cities}/>
+        <Select id="cities" isMulti=true items={cities_filtered} bind:value={cities}/>
     </div>
     <div>
         <label for="phone">Phone (required)</label>

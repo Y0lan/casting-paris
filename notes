@@ -3,7 +3,7 @@ checkbox loi européen RGPD de la protéction des données
 couleur de peau
 couleur de cheveux
 pays de résidence (required) OK (clear not working)
-ville de résidence (required) OK
+ville de résidence (required) OK (slow)
 
 modification corporel pour casting (oui / non / sans réponse)
 - coloration de cheveux ?
@@ -16,6 +16,9 @@ talent (sport, musique (chant,dance), théatre...) plsr sport
 10 langues les plus parlés au monde (qlq peux parler plusieurs langues)
 
 upload photo to profile
+
+
+all size can't be negative
 
 
 KRIS: QU'EST CE QUI EST OBLIGATOIRE?
