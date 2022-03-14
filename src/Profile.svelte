@@ -23,6 +23,7 @@
     let height = null;
     let agencies_choice = [];
     let agencies = [];
+    $: if (agencies === undefined) { agencies = []; }
     let phone = null;
     let email = null;
     let last_seen = null;
@@ -64,11 +65,16 @@
                 .from("agency")
                 .select(
                     `name,
-            id`
+                    id`
                 )
             if (error && status !== 406) throw error
             if(data) {
-                agencies_choice = agencies.map((agency) => agency.name)
+                agencies_choice = data.map((agency) => {
+                    return {
+                        "label": agency.name,
+                        "value": agency.id
+                    }
+                })
             }
         } catch (error) {
             alert(error.message)
@@ -281,7 +287,7 @@
         <label>Agency (required)</label>
         <Select id="agency" isMulti=true items={agencies_choice} bind:value={agencies}/>
     </div>
-    <div> <!-- TODO: fix can't clear field without crashing -->
+    <div>
         <label>Country (required)</label>
         <Select id="countries"
                 isRequired
