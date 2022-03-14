@@ -154,6 +154,7 @@
     }
 
     async function updateProfile() {
+        console.log(countries)
         try {
             loading = true
             const user = supabase.auth.user();
