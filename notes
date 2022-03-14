@@ -2,8 +2,8 @@ ajouter sexe : homme / femme / autres / ne souhaite pas répondre
 checkbox loi européen RGPD de la protéction des données
 couleur de peau
 couleur de cheveux
-pays de résidence (required) OK (clear not working)
-ville de résidence (required) OK (slow)
+pays de résidence (required) OK (test envoie formulaire not OK)
+ville de résidence (required) OK (test envoie form not OK)
 
 modification corporel pour casting (oui / non / sans réponse)
 - coloration de cheveux ?

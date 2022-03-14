@@ -21,21 +21,30 @@
     let eyes_color = null;
     let details = null;
     let height = null;
-    let agency = null;
+    let agencies_choice = [];
+    let agencies = [];
     let phone = null;
     let email = null;
     let last_seen = null;
     let gender = "no answer";
     const gender_choice = ["male", "female", "other", "no answer"]
-    let skin_color = "black";
-    const skin_color_choice = ["black", "white", "mixed"].sort()
-    let hair_color = "black"
+    let skin_color = "other";
+    const skin_color_choice = ["black", "white", "mixed", "others"].sort()
+    let hair_color = "other"
     const hair_color_choice = ["black", "brown", "blonde", "red", "blue", "purple", "pink", "others"].sort()
-    $: countries = ["France"];
+    $: countries = ["Angola"] ;
+    $: if (countries === undefined) { countries = []; }
     let all_cities = [{}];
     $: cities_filtered = [].concat.apply([], all_cities.map(a => countries.map(k => a[k["value"]]))[0]).sort();
     let cities = [];
-    let all_countries = []
+    $: if (cities === undefined) { cities = []; }
+    $: all_countries = []
+    let accept_body_modification = false;
+    let accept_nude = false;
+    let accept_figuration = false;
+    let lang = "FR"
+    let tags = [];
+
 
 
     async function getProfile() {
@@ -49,6 +58,22 @@
             all_countries.push(country_name)
             all_cities[0][country_name] = json[country]["cities"]
         }
+
+        try {
+            let {data, error, status} = await supabase
+                .from("agency")
+                .select(
+                    `name,
+            id`
+                )
+            if (error && status !== 406) throw error
+            if(data) {
+                agencies_choice = agencies.map((agency) => agency.name)
+            }
+        } catch (error) {
+            alert(error.message)
+        }
+
 
         try {
             loading = true;
@@ -74,7 +99,14 @@
                  height,
                  agency,
                  phone,
-                 email
+                 email,
+                 skin_color,
+                 hair_color,
+                 countries,
+                 cities,
+                 lang,
+                 gender,
+                 tags
                  `)
                 .eq('id', user.id)
                 .single()
@@ -97,9 +129,16 @@
                 eyes_color = data.eyes_color;
                 details = data.details;
                 height = data.height;
-                agency = data.agency;
+                agencies = data.agency;
                 phone = data.phone;
                 email = data.email;
+                skin_color = data.skin_color,
+                hair_color = data.hair_color,
+                countries = data.countries,
+                cities = data.cities,
+                lang = data.lang,
+                gender = data.gender,
+                tags = data.tags
             }
         } catch (error) {
             alert(error.message)
@@ -130,38 +169,15 @@
                 eyes_color,
                 details,
                 height,
-                agency,
-                phone
-            }
-
-            // check if agency exists
-            let agency_found = null;
-            try {
-                let {agency_db, error} = await supabase
-                    .from('agency')
-                    .select('name')
-                    .eq('name', agency)
-                    .single()
-
-                if (error) throw error
-                agency_found = agency_db;
-            } catch (error) {
-                alert(error.message)
-            }
-
-
-            if (!agency_found) {
-                try {
-                    let {error} = await supabase
-                        .from('agency')
-                        .insert([
-                            {name: agency}
-                        ])
-                    if (error) throw error
-                } catch (error) {
-                    alert(error.message)
-                }
-
+                agency: agencies,
+                phone,
+                skin_color,
+                hair_color,
+                countries,
+                cities,
+                lang,
+                gender,
+                tags
             }
 
             let {error} = await supabase.from('users').upsert(updates,
@@ -187,6 +203,7 @@
             loading = false
         }
     }
+
 </script>
 
 <form use:getProfile class="form-widget" on:submit|preventDefault={updateProfile}>
@@ -226,7 +243,7 @@
         />
     </div>
     <div>
-        <label for="gender">Gender (required)</label>
+        <label>Gender (required)</label>
         <Select
                 id="gender"
                 isSearchable="{false}"
@@ -234,7 +251,7 @@
                 bind:value={gender}/>
     </div>
     <div>
-        <label for="hair_color">Hair Color (required)</label>
+        <label>Hair Color (required)</label>
         <Select
                 id="hair_color"
                 isSearchable="{false}"
@@ -242,7 +259,7 @@
                 bind:value={hair_color}/>
     </div>
     <div>
-        <label for="skin_color">Skin Color (required)</label>
+        <label>Skin Color (required)</label>
         <Select
                 id="skin_color"
                 isSearchable="{false}"
@@ -261,28 +278,25 @@
 
 
     <div>
-        <label for="agency">Agency (required)</label>
-        <input
-                id="agency"
-                type="text"
-                required
-                bind:value={agency}
-        />
+        <label>Agency (required)</label>
+        <Select id="agency" isMulti=true items={agencies_choice} bind:value={agencies}/>
     </div>
     <div> <!-- TODO: fix can't clear field without crashing -->
-        <label for="countries">Country (required)</label>
+        <label>Country (required)</label>
         <Select id="countries"
                 isRequired
                 isClearable={false}
                 isMulti=true
                 items={all_countries}
                 bind:value={countries}
-                inputStyles=""/>
+        />
     </div>
 
     <div>
-        <label for="cities">Cities (required)</label>
-        <Select id="cities" isMulti=true items={cities_filtered} bind:value={cities}/>
+        <label>Cities (required)</label>
+        <Select id="cities"
+                isVirtualList="{true}"
+                isMulti=true items={cities_filtered} bind:value={cities}/>
     </div>
     <div>
         <label for="phone">Phone (required)</label>
