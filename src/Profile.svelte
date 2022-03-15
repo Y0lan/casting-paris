@@ -23,32 +23,58 @@
     let height = null;
     let agencies_choice = [];
     let agencies = [];
-    $: if (agencies === undefined) { agencies = []; }
+    $: if (agencies === undefined) {
+        agencies = [];
+    }
     let phone = null;
     let email = null;
     let last_seen = null;
-    let gender = "no answer";
     const gender_choice = ["male", "female", "other", "no answer"]
-    let skin_color = "other";
+    let gender = null;
+    $: if(gender !== null) {
+        gender = gender.value ? gender.value : gender;
+    }
     const skin_color_choice = ["black", "white", "mixed", "others"].sort()
-    let hair_color = "other"
+    let skin_color = null
+    $: if(skin_color !== null) {
+        skin_color = skin_color.value ? skin_color.value : skin_color;
+    }
     const hair_color_choice = ["black", "brown", "blonde", "red", "blue", "purple", "pink", "others"].sort()
-    $: countries = ["Angola"] ;
-    $: if (countries === undefined) { countries = []; }
-    let all_cities = [{}];
-    $: cities_filtered = [].concat.apply([], all_cities.map(a => countries.map(k => a[k["value"]]))[0]).sort();
-    let cities = [];
-    $: if (cities === undefined) { cities = []; }
+    let hair_color = hair_color_choice[0]
+    $: if(hair_color !== null) {
+        hair_color = hair_color.value ? hair_color.value : hair_color;
+    }
+
+    let countries = [];
     $: all_countries = []
+    $: if (countries === undefined || countries === null) {
+        countries = [];
+    } else {
+       countries = countries.map((country) => country.value ? country.value : country)
+    }
+
+    let cities = [];
+    let all_cities = [{}];
+    $: cities_filtered = [].concat.apply([], all_cities.map(a => countries.map(k => a[k]))[0]).sort();
+    $: if (cities === undefined || cities === null) {
+        cities = [];
+    } else {
+        cities = cities.map((city) => city.value ? city.value : city)
+    }
+
     let accept_body_modification = false;
     let accept_nude = false;
     let accept_figuration = false;
-    let lang = "FR"
+    let lang = null
+    let lang_choice = []
     let tags = [];
-
+    let tags_choice = [];
 
 
     async function getProfile() {
+
+        const user = supabase.auth.user();
+        last_seen = user.last_sign_in_at
 
         const json = await fetch(COUNTRIES_NOW_URL)
             .then(response => response.json())
@@ -60,6 +86,32 @@
             all_cities[0][country_name] = json[country]["cities"]
         }
 
+
+        // agencies
+        // get agencies of current user
+        try {
+            let {data: agenciesid, error, status} = await supabase
+                .from('usersagency')
+                .select('agencyid')
+                .eq('userid', user.id)
+            if (error && status !== 406) throw  error
+            if (agenciesid) {
+                for (let agencyid in agenciesid) {
+                    let {data: agencyname, error, status} = await supabase
+                        .from('agency')
+                        .select('name')
+                        .eq('id', agencyid)
+                    if (error && status !== 406) throw error
+                    if (agencyname) {
+                        agencies.push({"value": agencyid, "label": agencyname});
+                    }
+                }
+            }
+        } catch (error) {
+            alert(error.message)
+        }
+
+        // get all agencies name for choice
         try {
             let {data, error, status} = await supabase
                 .from("agency")
@@ -68,7 +120,7 @@
                     id`
                 )
             if (error && status !== 406) throw error
-            if(data) {
+            if (data) {
                 agencies_choice = data.map((agency) => {
                     return {
                         "label": agency.name,
@@ -79,43 +131,130 @@
         } catch (error) {
             alert(error.message)
         }
+        // tags
+        // get tags of current user
+        try {
+            let {data: tagsids, error, status} = await supabase
+                .from('usertags')
+                .select('tagid')
+                .eq('userid', user.id)
+            if (error && status !== 406) throw  error
+            if (tagsids) {
+                for (let tagid in tagsids) {
+                    let {data: tagname, error, status} = await supabase
+                        .from('tags')
+                        .select('tagname')
+                        .eq('id', tagid)
+                    if (error && status !== 406) throw error
+                    if (tagname) {
+                        tags.push({"value": tagid, "label": tagname});
+                    }
+                }
+            }
+        } catch (error) {
+            alert(error.message)
+        }
+
+        // get all tags name
+        try {
+            let {data, error, status} = await supabase
+                .from("tags")
+                .select(
+                    `tagname,
+                    id`
+                )
+            if (error && status !== 406) throw error
+            if (data) {
+                tags_choice = data.map((tag) => {
+                    return {
+                        "label": tag.tagname,
+                        "value": tag.id
+                    }
+                })
+            }
+        } catch (error) {
+            alert(error.message)
+        }
+
+        // lang
+        // get langs of current user
+        try {
+            let {data: langsids, error, status} = await supabase
+                .from('userlang')
+                .select('langid')
+                .eq('userid', user.id)
+            if (error && status !== 406) throw  error
+            if (langsids) {
+                for (let langid in langsids) {
+                    let {data: langname, error, status} = await supabase
+                        .from('lang')
+                        .select('lang')
+                        .eq('id', langid)
+                    if (error && status !== 406) throw error
+                    if (langname) {
+                        tags.push({"value": langid, "label": langname});
+                    }
+                }
+            }
+        } catch (error) {
+            alert(error.message)
+        }
+
+        // get all langs name
+        try {
+            let {data, error, status} = await supabase
+                .from("lang")
+                .select(
+                    `lang,
+                    id`
+                )
+            if (error && status !== 406) throw error
+            if (data) {
+                lang_choice = data.map((lang) => {
+                    return {
+                        "label": lang.lang,
+                        "value": lang.id
+                    }
+                })
+            }
+        } catch (error) {
+            alert(error.message)
+        }
 
 
         try {
             loading = true;
-            const user = supabase.auth.user();
-            last_seen = user.last_sign_in_at
 
+            // agencies, lang, tags
             let {data, error, status} = await supabase
                 .from('users')
                 .select(
                     `name,
-                 surname,
-                 birthdate,
-                 insta,
-                 facebook,
-                 jacket_size,
-                 trouser_size,
-                 chest_size,
-                 waist_size,
-                 hip_size,
-                 shoe_size,
-                 eyes_color,
-                 details,
-                 height,
-                 agency,
-                 phone,
-                 email,
-                 skin_color,
-                 hair_color,
-                 countries,
-                 cities,
-                 lang,
-                 gender,
-                 tags
-                 `)
+                     surname,
+                     birthdate,
+                     insta,
+                     facebook,
+                     jacket_size,
+                     trouser_size,
+                     chest_size,
+                     waist_size,
+                     hip_size,
+                     shoe_size,
+                     eyes_color,
+                     details,
+                     height,
+                     phone,
+                     email,
+                     skin_color,
+                     hair_color,
+                     countries,
+                     cities,
+                     gender
+                     `)
                 .eq('id', user.id)
-                .single()
+                .single();
+
+            console.log(data.countries)
 
 
             if (error && status !== 406) throw error
@@ -133,18 +272,15 @@
                 hip_size = data.hip_size;
                 shoe_size = data.shoe_size;
                 eyes_color = data.eyes_color;
-                details = data.details;
+                details = data.details
                 height = data.height;
-                agencies = data.agency;
                 phone = data.phone;
                 email = data.email;
-                skin_color = data.skin_color,
-                hair_color = data.hair_color,
-                countries = data.countries,
-                cities = data.cities,
-                lang = data.lang,
-                gender = data.gender,
-                tags = data.tags
+                skin_color = data.skin_color;
+                hair_color = data.hair_color;
+                countries = data.countries;
+                cities = data.cities;
+                gender = data.gender;
             }
         } catch (error) {
             alert(error.message)
@@ -176,15 +312,12 @@
                 eyes_color,
                 details,
                 height,
-                agency: agencies,
                 phone,
                 skin_color,
                 hair_color,
                 countries,
                 cities,
-                lang,
                 gender,
-                tags
             }
 
             let {error} = await supabase.from('users').upsert(updates,
@@ -287,6 +420,14 @@
     <div>
         <label>Agency (required)</label>
         <Select id="agency" isMulti=true items={agencies_choice} bind:value={agencies}/>
+    </div>
+    <div>
+        <label>Lang (required)</label>
+        <Select id="lang" isMulti=true items={lang_choice} bind:value={lang}/>
+    </div>
+    <div>
+        <label>Tags (required)</label>
+        <Select id="tags" isMulti=true items={tags_choice} bind:value={tags}/>
     </div>
     <div>
         <label>Country (required)</label>
