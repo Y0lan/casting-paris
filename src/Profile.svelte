@@ -31,17 +31,17 @@
     let last_seen = null;
     const gender_choice = ["male", "female", "other", "no answer"]
     let gender = null;
-    $: if(gender !== null) {
+    $: if (gender !== null) {
         gender = gender.value ? gender.value : gender;
     }
     const skin_color_choice = ["black", "white", "mixed", "others"].sort()
     let skin_color = null
-    $: if(skin_color !== null) {
+    $: if (skin_color !== null) {
         skin_color = skin_color.value ? skin_color.value : skin_color;
     }
     const hair_color_choice = ["black", "brown", "blonde", "red", "blue", "purple", "pink", "others"].sort()
     let hair_color = hair_color_choice[0]
-    $: if(hair_color !== null) {
+    $: if (hair_color !== null) {
         hair_color = hair_color.value ? hair_color.value : hair_color;
     }
 
@@ -50,7 +50,7 @@
     $: if (countries === undefined || countries === null) {
         countries = [];
     } else {
-       countries = countries.map((country) => country.value ? country.value : country)
+        countries = countries.map((country) => country.value ? country.value : country)
     }
 
     let cities = [];
@@ -65,7 +65,7 @@
     let accept_body_modification = false;
     let accept_nude = false;
     let accept_figuration = false;
-    let lang = null
+    let lang = []
     let lang_choice = []
     let tags = [];
     let tags_choice = [];
@@ -95,15 +95,18 @@
                 .select('agencyid')
                 .eq('userid', user.id)
             if (error && status !== 406) throw  error
+            $: console.log("agencies id", agenciesid)
             if (agenciesid) {
-                for (let agencyid in agenciesid) {
-                    let {data: agencyname, error, status} = await supabase
+                for (let {agencyid} of agenciesid) {
+                    let {data: agency, error, status} = await supabase
                         .from('agency')
                         .select('name')
                         .eq('id', agencyid)
+                        .single()
+
                     if (error && status !== 406) throw error
-                    if (agencyname) {
-                        agencies.push({"value": agencyid, "label": agencyname});
+                    if (agency) {
+                        agencies.push({"value": agencyid, "label": agency.name});
                     }
                 }
             }
@@ -140,17 +143,20 @@
                 .eq('userid', user.id)
             if (error && status !== 406) throw  error
             if (tagsids) {
-                for (let tagid in tagsids) {
-                    let {data: tagname, error, status} = await supabase
+                for (let {tagid} of tagsids) {
+                    let {data: tag, error, status} = await supabase
                         .from('tags')
                         .select('tagname')
                         .eq('id', tagid)
+                        .single()
                     if (error && status !== 406) throw error
-                    if (tagname) {
-                        tags.push({"value": tagid, "label": tagname});
+                    if (tag) {
+                        tags.push({"value": tagid, "label": tag.tagname});
                     }
                 }
+                $: console.log(tags)
             }
+            //    $: console.log("tags: ", tags)
         } catch (error) {
             alert(error.message)
         }
@@ -185,17 +191,19 @@
                 .eq('userid', user.id)
             if (error && status !== 406) throw  error
             if (langsids) {
-                for (let langid in langsids) {
-                    let {data: langname, error, status} = await supabase
+                for (let {langid} of langsids) {
+                    let {data: language, error, status} = await supabase
                         .from('lang')
                         .select('lang')
                         .eq('id', langid)
+                        .single()
                     if (error && status !== 406) throw error
-                    if (langname) {
-                        tags.push({"value": langid, "label": langname});
+                    if (language) {
+                        lang.push({"value": langid, "label": language.lang});
                     }
                 }
             }
+            //    $: console.log("lang: ", lang)
         } catch (error) {
             alert(error.message)
         }
