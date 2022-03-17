@@ -21,6 +21,8 @@
     let eyes_color = null;
     let details = null;
     let height = null;
+    let last_updated = null;
+    $: console.log("last updated: ", last_updated)
     let agencies_choice = [];
     let agencies = [];
     $: if (agencies === undefined) {
@@ -28,7 +30,6 @@
     }
     let phone = null;
     let email = null;
-    let last_seen = null;
     const gender_choice = ["male", "female", "other", "no answer"]
     let gender = null;
     $: if (gender !== null) {
@@ -65,17 +66,34 @@
     let accept_body_modification = false;
     let accept_nude = false;
     let accept_figuration = false;
-    let lang = []
-    let lang_choice = []
+
+    const doesExist = (obj, value) => {
+        for (let items of obj) {
+            if (items["label"] === value) {
+                return true
+            }
+        }
+        return false
+    }
+
+
+
+
+    let all_lang_choice = []
+    $: lang_primary = []
+    $: lang_secondary = []
+
+    $: if (lang_primary === undefined || lang_primary === null) lang_primary = []
+
+    $: if (lang_secondary === undefined || lang_secondary === null) lang_secondary = []
+
+
     let tags = [];
     let tags_choice = [];
-
 
     async function getProfile() {
 
         const user = supabase.auth.user();
-        last_seen = user.last_sign_in_at
-
         const json = await fetch(COUNTRIES_NOW_URL)
             .then(response => response.json())
             .then(json => json["data"]);
@@ -95,7 +113,6 @@
                 .select('agencyid')
                 .eq('userid', user.id)
             if (error && status !== 406) throw  error
-            $: console.log("agencies id", agenciesid)
             if (agenciesid) {
                 for (let {agencyid} of agenciesid) {
                     let {data: agency, error, status} = await supabase
@@ -154,9 +171,7 @@
                         tags.push({"value": tagid, "label": tag.tagname});
                     }
                 }
-                $: console.log(tags)
             }
-            //    $: console.log("tags: ", tags)
         } catch (error) {
             alert(error.message)
         }
@@ -185,25 +200,28 @@
         // lang
         // get langs of current user
         try {
-            let {data: langsids, error, status} = await supabase
+            let {data: langs_from_db, error, status} = await supabase
                 .from('userlang')
-                .select('langid')
+                .select(`langid,isprimary`)
                 .eq('userid', user.id)
             if (error && status !== 406) throw  error
-            if (langsids) {
-                for (let {langid} of langsids) {
+            if (langs_from_db) {
+                for (let lang_from_db of langs_from_db) {
                     let {data: language, error, status} = await supabase
                         .from('lang')
                         .select('lang')
-                        .eq('id', langid)
+                        .eq('id', lang_from_db.langid)
                         .single()
                     if (error && status !== 406) throw error
                     if (language) {
-                        lang.push({"value": langid, "label": language.lang});
+                        if (lang_from_db.isprimary) lang_primary.push({
+                            "value": lang_from_db.langid,
+                            "label": language.lang
+                        });
+                        else lang_secondary.push({"value": lang_from_db.langid, "label": language.lang})
                     }
                 }
             }
-            //    $: console.log("lang: ", lang)
         } catch (error) {
             alert(error.message)
         }
@@ -218,10 +236,10 @@
                 )
             if (error && status !== 406) throw error
             if (data) {
-                lang_choice = data.map((lang) => {
+                all_lang_choice = data.map((lang) => {
                     return {
-                        "label": lang.lang,
-                        "value": lang.id
+                        "value": lang.id,
+                        "label": lang.lang
                     }
                 })
             }
@@ -229,11 +247,9 @@
             alert(error.message)
         }
 
-
         try {
             loading = true;
 
-            // agencies, lang, tags
             let {data, error, status} = await supabase
                 .from('users')
                 .select(
@@ -257,12 +273,11 @@
                      hair_color,
                      countries,
                      cities,
-                     gender
+                     gender,
+                     last_updated
                      `)
                 .eq('id', user.id)
                 .single();
-
-            console.log(data.countries)
 
 
             if (error && status !== 406) throw error
@@ -289,6 +304,7 @@
                 countries = data.countries;
                 cities = data.cities;
                 gender = data.gender;
+                last_updated = data.last_updated;
             }
         } catch (error) {
             alert(error.message)
@@ -298,11 +314,9 @@
     }
 
     async function updateProfile() {
-        console.log(countries)
         try {
             loading = true
             const user = supabase.auth.user();
-            last_seen = user.last_sign_in_at
             const updates = {
                 id: user.id,
                 email: user.email,
@@ -333,6 +347,9 @@
                     returning: 'minimal'
                 })
             if (error) throw error
+
+
+
         } catch (error) {
             alert(error.message)
         } finally {
@@ -361,7 +378,7 @@
     </div>
     <div>
         <label for="last_casting">Last seen</label>
-        <input id="last_casting" type="text" value={moment(last_seen).format('MM/DD/yyyy, HH:mm:ss')} disabled>
+        <input id="last_casting" type="text" value={moment(last_updated).subtract(1, 'hours').format('yyyy-MM-DD HH:MM:ss')} disabled>
     </div>
     <div>
         <label for="name">Name (required)</label>
@@ -430,8 +447,18 @@
         <Select id="agency" isMulti=true items={agencies_choice} bind:value={agencies}/>
     </div>
     <div>
-        <label>Lang (required)</label>
-        <Select id="lang" isMulti=true items={lang_choice} bind:value={lang}/>
+        <label>Lang fluent (primary) (required)</label>
+        <Select id="lang"
+                isMulti=true
+                items={all_lang_choice}
+                bind:value={lang_primary}/>
+    </div>
+    <div>
+        <label>Lang (secondary) (required)</label>
+        <Select id="lang"
+                isMulti=true
+                items={all_lang_choice}
+                bind:value={lang_secondary}/>
     </div>
     <div>
         <label>Tags (required)</label>
