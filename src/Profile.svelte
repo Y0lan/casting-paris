@@ -1,7 +1,7 @@
 <script>
     import {supabase} from "./supabaseClient";
     import {user} from "./sessionStore";
-    import moment from "moment";
+    import moment, {now} from "moment";
     import Select from 'svelte-select';
 
     const COUNTRIES_NOW_URL = "https://countriesnow.space/api/v0.1/countries"
@@ -340,6 +340,7 @@
                 countries,
                 cities,
                 gender,
+                last_updated : moment().format("yyyy-MM-DD HH:mm:ss")
             }
 
             let {error} = await supabase.from('users').upsert(updates,
@@ -378,7 +379,7 @@
     </div>
     <div>
         <label for="last_casting">Last seen</label>
-        <input id="last_casting" type="text" value={moment(last_updated).subtract(1, 'hours').format('yyyy-MM-DD HH:MM:ss')} disabled>
+        <input id="last_casting" type="text" value={moment(last_updated).tz('Europe/Paris').format('yyyy-MM-DD HH:MM:ss')} disabled>
     </div>
     <div>
         <label for="name">Name (required)</label>
