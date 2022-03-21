@@ -1,7 +1,7 @@
 <script>
     import {supabase} from "./supabaseClient";
     import {user} from "./sessionStore";
-    import moment, {now} from "moment";
+    import moment, {now} from "moment-timezone";
     import Select from 'svelte-select';
 
     const COUNTRIES_NOW_URL = "https://countriesnow.space/api/v0.1/countries"
@@ -22,7 +22,6 @@
     let details = null;
     let height = null;
     let last_updated = null;
-    $: console.log("last updated: ", last_updated)
     let agencies_choice = [];
     let agencies = [];
     $: if (agencies === undefined) {
@@ -48,20 +47,16 @@
 
     let countries = [];
     $: all_countries = []
-    $: if (countries === undefined || countries === null) {
-        countries = [];
-    } else {
-        countries = countries.map((country) => country.value ? country.value : country)
-    }
 
     let cities = [];
-    let all_cities = [{}];
-    $: cities_filtered = [].concat.apply([], all_cities.map(a => countries.map(k => a[k]))[0]).sort();
+    let all_cities = [];
     $: if (cities === undefined || cities === null) {
         cities = [];
     } else {
         cities = cities.map((city) => city.value ? city.value : city)
     }
+
+    let location = []
 
     let accept_body_modification = false;
     let accept_nude = false;
@@ -101,7 +96,7 @@
         for (let country in json) {
             const country_name = json[country]["country"];
             all_countries.push(country_name)
-            all_cities[0][country_name] = json[country]["cities"]
+            all_cities.push(...json[country]["cities"].map((cities) => cities + " - " + country_name))
         }
 
 
@@ -271,8 +266,7 @@
                      email,
                      skin_color,
                      hair_color,
-                     countries,
-                     cities,
+                     location,
                      gender,
                      last_updated
                      `)
@@ -295,16 +289,15 @@
                 hip_size = data.hip_size;
                 shoe_size = data.shoe_size;
                 eyes_color = data.eyes_color;
-                details = data.details
+                details = data.details;
                 height = data.height;
                 phone = data.phone;
                 email = data.email;
                 skin_color = data.skin_color;
                 hair_color = data.hair_color;
-                countries = data.countries;
-                cities = data.cities;
+                location = data.location;
                 gender = data.gender;
-                last_updated = data.last_updated;
+                last_updated = moment(data.last_updated).tz("Europe/Paris").format("yyyy-MM-DD HH:mm:ss")
             }
         } catch (error) {
             alert(error.message)
@@ -337,10 +330,11 @@
                 phone,
                 skin_color,
                 hair_color,
-                countries,
-                cities,
+                countries: location.map((city) => city.split("-")[1].trim()),
+                cities: location.map((city) => city.split("-")[0].trim()),
                 gender,
-                last_updated : moment().format("yyyy-MM-DD HH:mm:ss")
+                location: location
+                last_updated : moment().tz("Europe/Paris").format("yyyy-MM-DD HH:mm:ss")
             }
 
             let {error} = await supabase.from('users').upsert(updates,
@@ -379,7 +373,7 @@
     </div>
     <div>
         <label for="last_casting">Last seen</label>
-        <input id="last_casting" type="text" value={moment(last_updated).tz('Europe/Paris').format('yyyy-MM-DD HH:MM:ss')} disabled>
+        <input id="last_casting" type="text" value={last_updated} disabled>
     </div>
     <div>
         <label for="name">Name (required)</label>
@@ -465,22 +459,12 @@
         <label>Tags (required)</label>
         <Select id="tags" isMulti=true items={tags_choice} bind:value={tags}/>
     </div>
-    <div>
-        <label>Country (required)</label>
-        <Select id="countries"
-                isRequired
-                isClearable={false}
-                isMulti=true
-                items={all_countries}
-                bind:value={countries}
-        />
-    </div>
 
     <div>
         <label>Cities (required)</label>
         <Select id="cities"
                 isVirtualList="{true}"
-                isMulti=true items={cities_filtered} bind:value={cities}/>
+                isMulti=true items={all_locations} bind:value={locations}/>
     </div>
     <div>
         <label for="phone">Phone (required)</label>
