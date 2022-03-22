@@ -56,23 +56,16 @@
         cities = cities.map((city) => city.value ? city.value : city)
     }
 
-    let location = []
+    let locations = []
+    $: if (locations === undefined || locations === null) {
+        locations = []
+    } else {
+        locations = locations.map((city) => city.value ? city.value : city)
+    }
 
     let accept_body_modification = false;
     let accept_nude = false;
     let accept_figuration = false;
-
-    const doesExist = (obj, value) => {
-        for (let items of obj) {
-            if (items["label"] === value) {
-                return true
-            }
-        }
-        return false
-    }
-
-
-
 
     let all_lang_choice = []
     $: lang_primary = []
@@ -95,7 +88,6 @@
 
         for (let country in json) {
             const country_name = json[country]["country"];
-            all_countries.push(country_name)
             all_cities.push(...json[country]["cities"].map((cities) => cities + " - " + country_name))
         }
 
@@ -266,7 +258,7 @@
                      email,
                      skin_color,
                      hair_color,
-                     location,
+                     locations,
                      gender,
                      last_updated
                      `)
@@ -295,7 +287,7 @@
                 email = data.email;
                 skin_color = data.skin_color;
                 hair_color = data.hair_color;
-                location = data.location;
+                locations = data.locations;
                 gender = data.gender;
                 last_updated = moment(data.last_updated).tz("Europe/Paris").format("yyyy-MM-DD HH:mm:ss")
             }
@@ -307,9 +299,40 @@
     }
 
     async function updateProfile() {
+
+        const user = supabase.auth.user();
         try {
             loading = true
-            const user = supabase.auth.user();
+
+            // lang
+            // delete all langs of user
+
+            let {error} = await supabase
+                .from('userlang')
+                .delete()
+                .eq('userid', user.id)
+
+            if (error) throw  error
+
+            error = await supabase
+            .from('userlang')
+            .insert({
+
+            })
+
+            // tags
+            // delete all tags
+
+            // agencies
+            // delete all langs
+
+
+        } catch (error) {
+            alert(error.message)
+        }
+
+
+        try {
             const updates = {
                 id: user.id,
                 email: user.email,
@@ -330,11 +353,11 @@
                 phone,
                 skin_color,
                 hair_color,
-                countries: location.map((city) => city.split("-")[1].trim()),
-                cities: location.map((city) => city.split("-")[0].trim()),
+                countries: locations.map((city) => city.split("-")[1].trim()),
+                cities: locations.map((city) => city.split("-")[0].trim()),
                 gender,
-                location: location
-                last_updated : moment().tz("Europe/Paris").format("yyyy-MM-DD HH:mm:ss")
+                locations: locations,
+                last_updated: moment().tz("Europe/Paris").format("yyyy-MM-DD HH:mm:ss")
             }
 
             let {error} = await supabase.from('users').upsert(updates,
@@ -342,7 +365,6 @@
                     returning: 'minimal'
                 })
             if (error) throw error
-
 
 
         } catch (error) {
@@ -373,7 +395,7 @@
     </div>
     <div>
         <label for="last_casting">Last seen</label>
-        <input id="last_casting" type="text" value={last_updated} disabled>
+        <input id="last_casting" type="text" value={last_updated ? last_updated : "Never"} disabled>
     </div>
     <div>
         <label for="name">Name (required)</label>
@@ -439,7 +461,7 @@
 
     <div>
         <label>Agency (required)</label>
-        <Select id="agency" isMulti=true items={agencies_choice} bind:value={agencies}/>
+        <Select id="agency" isMulti=true items={agencies_choice} bind:value={agencies} isCreatable=true />
     </div>
     <div>
         <label>Lang fluent (primary) (required)</label>
@@ -457,14 +479,14 @@
     </div>
     <div>
         <label>Tags (required)</label>
-        <Select id="tags" isMulti=true items={tags_choice} bind:value={tags}/>
+        <Select id="tags" isMulti=true items={tags_choice} bind:value={tags} isCreatable=true />
     </div>
 
     <div>
         <label>Cities (required)</label>
         <Select id="cities"
                 isVirtualList="{true}"
-                isMulti=true items={all_locations} bind:value={locations}/>
+                isMulti=true items={all_cities} bind:value={locations}/>
     </div>
     <div>
         <label for="phone">Phone (required)</label>

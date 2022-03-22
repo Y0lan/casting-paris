@@ -1,25 +1,23 @@
-ajouter sexe : homme / femme / autres / ne souhaite pas répondre
 checkbox loi européen RGPD de la protéction des données
-couleur de peau
-couleur de cheveux
-pays de résidence (required) OK (test envoie formulaire not OK)
-ville de résidence (required) OK (test envoie form not OK)
 
 modification corporel pour casting (oui / non / sans réponse)
 - coloration de cheveux ?
 - nu ?
 - figuration ?
 
-un casté peux faire partie de plusieurs agences (à tester...)
-talent (sport, musique (chant,dance), théatre...) plsr sport (à tester...)
+un casté peux faire partie de plusieurs agences ENVOIE / SUPPRESSION NOT OK
+talent (sport, musique (chant,dance), théatre...) plsr sport ENVOIE / SUPPRESSION NOT OK
 
-10 langues les plus parlés au monde (qlq peux parler plusieurs langues) (à tester...)
+10 langues les plus parlés au monde (qlq peux parler plusieurs langues) ENVOIE / SUPPRESSION NOT OK
 lang1 lang2
+suppression des doublons dans les langues
 
 upload photo to profile
 
 
-all size can't be negative
+all number can't be negative
+phone number must be valid
+
 
 
 KRIS: QU'EST CE QUI EST OBLIGATOIRE?
