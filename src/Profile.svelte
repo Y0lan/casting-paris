@@ -229,6 +229,7 @@
                         "label": lang.lang
                     }
                 })
+
             }
         } catch (error) {
             alert(error.message)
@@ -307,24 +308,43 @@
             // lang
             // delete all langs of user
 
-            let {error} = await supabase
+            let {error_delete_lang} = await supabase
                 .from('userlang')
                 .delete()
                 .eq('userid', user.id)
 
-            if (error) throw  error
+            if (error_delete_lang) throw  error_delete_lang
 
-            error = await supabase
-            .from('userlang')
-            .insert({
 
-            })
+            // primary lang
+
+            for(let lang of lang_primary) {
+                // does lang exist ?
+
+            }
+
+            // secondary lang
+
 
             // tags
             // delete all tags
+            let {error_delete_tags} = await supabase
+                .from('usertags')
+                .delete()
+                .eq('userid', user.id)
+
+            if (error_delete_tags) throw error_delete_tags
 
             // agencies
-            // delete all langs
+            // delete all agencies of user
+
+            let {error_delete_agencies} = await supabase
+            .from('usersagency')
+            .delete()
+            .eq('userid', user.id)
+
+            if (error_delete_agencies) throw error_delete_agencies
+
 
 
         } catch (error) {
