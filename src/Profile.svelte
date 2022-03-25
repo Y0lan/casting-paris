@@ -1,376 +1,64 @@
 <script>
     import {supabase} from "./supabaseClient";
     import {user} from "./sessionStore";
-    import moment, {now} from "moment-timezone";
+    import moment from "moment-timezone";
     import Select from 'svelte-select';
-
-    const COUNTRIES_NOW_URL = "https://countriesnow.space/api/v0.1/countries"
+    import {getAttributes} from "./attributes/get-attributes"
+    import {updateLanguages} from "./attributes/lang";
 
     let loading = true;
-    let name = null;
-    let surname = null;
-    let birthdate = null;
-    let insta = null;
-    let facebook = null;
-    let jacket_size = null;
-    let trouser_size = null;
-    let chest_size = null;
-    let waist_size = null;
-    let hip_size = null;
-    let shoe_size = null;
-    let eyes_color = null;
-    let details = null;
-    let height = null;
-    let last_updated = null;
-    let agencies_choice = [];
-    let agencies = [];
-    $: if (agencies === undefined) {
-        agencies = [];
-    }
-    let phone = null;
-    let email = null;
-    const gender_choice = ["male", "female", "other", "no answer"]
-    let gender = null;
-    $: if (gender !== null) {
-        gender = gender.value ? gender.value : gender;
-    }
-    const skin_color_choice = ["black", "white", "mixed", "others"].sort()
-    let skin_color = null
-    $: if (skin_color !== null) {
-        skin_color = skin_color.value ? skin_color.value : skin_color;
-    }
-    const hair_color_choice = ["black", "brown", "blonde", "red", "blue", "purple", "pink", "others"].sort()
-    let hair_color = hair_color_choice[0]
-    $: if (hair_color !== null) {
-        hair_color = hair_color.value ? hair_color.value : hair_color;
-    }
+    let attributes = [{}]
 
-    let countries = [];
-    $: all_countries = []
+    $: if (attributes.agencies === undefined || attributes.agencies === null) attributes.agencies = []
+    $: if (attributes.gender !== null) attributes.gender.value ? attributes.gender.value : attributes.gender;
+    $: if (attributes.skin_color !== null) attributes.skin_color = attributes.skin_color.value ? attributes.skin_color.value : attributes.skin_color;
+    $: if (attributes.hair_color !== null) attributes.hair_color = attributes.hair_color.value ? attributes.hair_color.value : attributes.hair_color;
 
-    let cities = [];
-    let all_cities = [];
-    $: if (cities === undefined || cities === null) {
-        cities = [];
-    } else {
-        cities = cities.map((city) => city.value ? city.value : city)
-    }
+    $: if (attributes.cities === undefined || attributes.cities === null) attributes.cities = [];
+    else attributes.cities = attributes.cities.map((city) => city.value ? city.value : city)
 
-    let locations = []
-    $: if (locations === undefined || locations === null) {
-        locations = []
-    } else {
-        locations = locations.map((city) => city.value ? city.value : city)
-    }
+    $: if (attributes.locations === undefined || attributes.locations === null) attributes.locations = []
+    else attributes.locations = attributes.locations.map((city) => city.value ? city.value : city)
 
-    let accept_body_modification = false;
-    let accept_nude = false;
-    let accept_figuration = false;
+    $: if (attributes.lang_primary === undefined || attributes.lang_primary === null) attributes.lang_primary = []
+    $: if (attributes.lang_secondary === undefined || attributes.lang_secondary === null) attributes.lang_secondary = []
 
-    let all_lang_choice = []
-    $: lang_primary = []
-    $: lang_secondary = []
+    const user = supabase.auth.user();
 
-    $: if (lang_primary === undefined || lang_primary === null) lang_primary = []
-
-    $: if (lang_secondary === undefined || lang_secondary === null) lang_secondary = []
-
-
-    let tags = [];
-    let tags_choice = [];
 
     async function getProfile() {
-
-        const user = supabase.auth.user();
-        const json = await fetch(COUNTRIES_NOW_URL)
-            .then(response => response.json())
-            .then(json => json["data"]);
-
-        for (let country in json) {
-            const country_name = json[country]["country"];
-            all_cities.push(...json[country]["cities"].map((cities) => cities + " - " + country_name))
-        }
-
-
-        // agencies
-        // get agencies of current user
-        try {
-            let {data: agenciesid, error, status} = await supabase
-                .from('usersagency')
-                .select('agencyid')
-                .eq('userid', user.id)
-            if (error && status !== 406) throw  error
-            if (agenciesid) {
-                for (let {agencyid} of agenciesid) {
-                    let {data: agency, error, status} = await supabase
-                        .from('agency')
-                        .select('name')
-                        .eq('id', agencyid)
-                        .single()
-
-                    if (error && status !== 406) throw error
-                    if (agency) {
-                        agencies.push({"value": agencyid, "label": agency.name});
-                    }
-                }
-            }
-        } catch (error) {
-            alert(error.message)
-        }
-
-        // get all agencies name for choice
-        try {
-            let {data, error, status} = await supabase
-                .from("agency")
-                .select(
-                    `name,
-                    id`
-                )
-            if (error && status !== 406) throw error
-            if (data) {
-                agencies_choice = data.map((agency) => {
-                    return {
-                        "label": agency.name,
-                        "value": agency.id
-                    }
-                })
-            }
-        } catch (error) {
-            alert(error.message)
-        }
-        // tags
-        // get tags of current user
-        try {
-            let {data: tagsids, error, status} = await supabase
-                .from('usertags')
-                .select('tagid')
-                .eq('userid', user.id)
-            if (error && status !== 406) throw  error
-            if (tagsids) {
-                for (let {tagid} of tagsids) {
-                    let {data: tag, error, status} = await supabase
-                        .from('tags')
-                        .select('tagname')
-                        .eq('id', tagid)
-                        .single()
-                    if (error && status !== 406) throw error
-                    if (tag) {
-                        tags.push({"value": tagid, "label": tag.tagname});
-                    }
-                }
-            }
-        } catch (error) {
-            alert(error.message)
-        }
-
-        // get all tags name
-        try {
-            let {data, error, status} = await supabase
-                .from("tags")
-                .select(
-                    `tagname,
-                    id`
-                )
-            if (error && status !== 406) throw error
-            if (data) {
-                tags_choice = data.map((tag) => {
-                    return {
-                        "label": tag.tagname,
-                        "value": tag.id
-                    }
-                })
-            }
-        } catch (error) {
-            alert(error.message)
-        }
-
-        // lang
-        // get langs of current user
-        try {
-            let {data: langs_from_db, error, status} = await supabase
-                .from('userlang')
-                .select(`langid,isprimary`)
-                .eq('userid', user.id)
-            if (error && status !== 406) throw  error
-            if (langs_from_db) {
-                for (let lang_from_db of langs_from_db) {
-                    let {data: language, error, status} = await supabase
-                        .from('lang')
-                        .select('lang')
-                        .eq('id', lang_from_db.langid)
-                        .single()
-                    if (error && status !== 406) throw error
-                    if (language) {
-                        if (lang_from_db.isprimary) lang_primary.push({
-                            "value": lang_from_db.langid,
-                            "label": language.lang
-                        });
-                        else lang_secondary.push({"value": lang_from_db.langid, "label": language.lang})
-                    }
-                }
-            }
-        } catch (error) {
-            alert(error.message)
-        }
-
-        // get all langs name
-        try {
-            let {data, error, status} = await supabase
-                .from("lang")
-                .select(
-                    `lang,
-                    id`
-                )
-            if (error && status !== 406) throw error
-            if (data) {
-                all_lang_choice = data.map((lang) => {
-                    return {
-                        "value": lang.id,
-                        "label": lang.lang
-                    }
-                })
-
-            }
-        } catch (error) {
-            alert(error.message)
-        }
-
-        try {
-            loading = true;
-
-            let {data, error, status} = await supabase
-                .from('users')
-                .select(
-                    `name,
-                     surname,
-                     birthdate,
-                     insta,
-                     facebook,
-                     jacket_size,
-                     trouser_size,
-                     chest_size,
-                     waist_size,
-                     hip_size,
-                     shoe_size,
-                     eyes_color,
-                     details,
-                     height,
-                     phone,
-                     email,
-                     skin_color,
-                     hair_color,
-                     locations,
-                     gender,
-                     last_updated
-                     `)
-                .eq('id', user.id)
-                .single();
-
-
-            if (error && status !== 406) throw error
-
-            if (data) {
-                name = data.name;
-                surname = data.surname;
-                birthdate = data.birthdate;
-                insta = data.insta;
-                facebook = data.facebook;
-                jacket_size = data.jacket_size;
-                trouser_size = data.trouser_size;
-                chest_size = data.chest_size;
-                waist_size = data.waist_size;
-                hip_size = data.hip_size;
-                shoe_size = data.shoe_size;
-                eyes_color = data.eyes_color;
-                details = data.details;
-                height = data.height;
-                phone = data.phone;
-                email = data.email;
-                skin_color = data.skin_color;
-                hair_color = data.hair_color;
-                locations = data.locations;
-                gender = data.gender;
-                last_updated = moment(data.last_updated).tz("Europe/Paris").format("yyyy-MM-DD HH:mm:ss")
-            }
-        } catch (error) {
-            alert(error.message)
-        } finally {
-            loading = false
-        }
+        loading = true;
+        attributes = await getAttributes(user.id);
+        loading = false
     }
 
     async function updateProfile() {
+        loading = true
+        await updateLanguages(attributes.lang_primary, attributes.lang_secondary, user.id)
 
-        const user = supabase.auth.user();
-        try {
-            loading = true
+        let {error_delete_tags} = await supabase
+            .from('usertags')
+            .delete()
+            .eq('userid', user.id)
 
-            // lang
-            // delete all langs of user
-
-            let {error_delete_lang} = await supabase
-                .from('userlang')
-                .delete()
-                .eq('userid', user.id)
-
-            if (error_delete_lang) throw  error_delete_lang
+        if (error_delete_tags) throw error_delete_tags
 
 
-            for(let lang of lang_primary) {
-                let {error} = await supabase
-                .from('userlang')
-                .insert(
-                    {'langid': lang.value,
-                        'userid': user.id,
-                        isprimary: true
-                    }
-                )
+        for (let tag of tags) {
+            // if tags does not exist create it:
 
-                if(error) throw error
-            }
+            // insert tags
+        }
 
-            // secondary lang
+        // agencies
+        // delete all agencies of user
 
-            lang_secondary = _.uniq()
-
-            for(let lang of lang_secondary) {
-                let {error} = await supabase
-                    .from('userlang')
-                    .insert(
-                        {'langid': lang.value,
-                            'userid': user.id,
-                            isprimary: false
-                        }
-                    )
-
-                if(error) throw error
-            }
-
-
-            // tags
-            // delete all tags
-            let {error_delete_tags} = await supabase
-                .from('usertags')
-                .delete()
-                .eq('userid', user.id)
-
-            if (error_delete_tags) throw error_delete_tags
-
-            // agencies
-            // delete all agencies of user
-
-            let {error_delete_agencies} = await supabase
+        let {error_delete_agencies} = await supabase
             .from('usersagency')
             .delete()
             .eq('userid', user.id)
 
-            if (error_delete_agencies) throw error_delete_agencies
-
-
-
-        } catch (error) {
-            alert(error.message)
-        }
+        if (error_delete_agencies) throw error_delete_agencies
 
 
         try {
@@ -502,7 +190,7 @@
 
     <div>
         <label>Agency (required)</label>
-        <Select id="agency" isMulti=true items={agencies_choice} bind:value={agencies} isCreatable=true />
+        <Select id="agency" isMulti=true items={agencies_choice} bind:value={agencies} isCreatable=true/>
     </div>
     <div>
         <label>Lang fluent (primary) (required)</label>
@@ -520,7 +208,7 @@
     </div>
     <div>
         <label>Tags (required)</label>
-        <Select id="tags" isMulti=true items={tags_choice} bind:value={tags} isCreatable=true />
+        <Select id="tags" isMulti=true items={tags_choice} bind:value={tags} isCreatable=true/>
     </div>
 
     <div>

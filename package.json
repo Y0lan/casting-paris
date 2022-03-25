@@ -25,6 +25,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.34",
+    "node-fetch": "^3.2.3",
     "sirv-cli": "^2.0.0",
     "svelte-select": "^4.4.7"
   }
