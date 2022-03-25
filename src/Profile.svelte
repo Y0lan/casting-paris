@@ -316,14 +316,35 @@
             if (error_delete_lang) throw  error_delete_lang
 
 
-            // primary lang
-
             for(let lang of lang_primary) {
-                // does lang exist ?
+                let {error} = await supabase
+                .from('userlang')
+                .insert(
+                    {'langid': lang.value,
+                        'userid': user.id,
+                        isprimary: true
+                    }
+                )
 
+                if(error) throw error
             }
 
             // secondary lang
+
+            lang_secondary = _.uniq()
+
+            for(let lang of lang_secondary) {
+                let {error} = await supabase
+                    .from('userlang')
+                    .insert(
+                        {'langid': lang.value,
+                            'userid': user.id,
+                            isprimary: false
+                        }
+                    )
+
+                if(error) throw error
+            }
 
 
             // tags
