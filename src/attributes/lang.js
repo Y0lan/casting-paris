@@ -5,8 +5,8 @@ import {runInContext as _} from "lodash";
 export const get_all_user_languages = async (userid) => {
 
     const user_lang = {
-        "lang_primary": null,
-        "lang_secondary": null
+        "lang_primary": [],
+        "lang_secondary": []
     }
 
     let {data: langs_from_db, error, status} = await supabase

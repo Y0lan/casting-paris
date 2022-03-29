@@ -7,60 +7,112 @@
     import {updateLanguages} from "./attributes/lang";
 
     let loading = true;
-    let attributes = [{}]
 
-    $: if (attributes.agencies === undefined || attributes.agencies === null) attributes.agencies = []
-    $: if (attributes.gender !== null) attributes.gender.value ? attributes.gender.value : attributes.gender;
-    $: if (attributes.skin_color !== null) attributes.skin_color = attributes.skin_color.value ? attributes.skin_color.value : attributes.skin_color;
-    $: if (attributes.hair_color !== null) attributes.hair_color = attributes.hair_color.value ? attributes.hair_color.value : attributes.hair_color;
+    let agencies = null
+    $: if (agencies === undefined || agencies === null) agencies = []
 
-    $: if (attributes.cities === undefined || attributes.cities === null) attributes.cities = [];
-    else attributes.cities = attributes.cities.map((city) => city.value ? city.value : city)
+    let gender = null
+    $: if (gender !== null) gender.value ? gender.value : gender;
 
-    $: if (attributes.locations === undefined || attributes.locations === null) attributes.locations = []
-    else attributes.locations = attributes.locations.map((city) => city.value ? city.value : city)
+    let skin_color = null
+    $: if (skin_color !== null) skin_color = skin_color.value ? skin_color.value : skin_color;
 
-    $: if (attributes.lang_primary === undefined || attributes.lang_primary === null) attributes.lang_primary = []
-    $: if (attributes.lang_secondary === undefined || attributes.lang_secondary === null) attributes.lang_secondary = []
+    let hair_color = null
+    $: if (hair_color !== null) hair_color = hair_color.value ? hair_color.value : hair_color;
 
-    const user = supabase.auth.user();
+    let cities = null
+    $: if (cities === undefined || cities === null) cities = [];
+    else cities = cities.map((city) => city.value ? city.value : city)
 
+    let locations = null
+    $: if (locations === undefined || locations === null) locations = []
+    else locations = locations.map((city) => city.value ? city.value : city)
+
+    let lang_primary = null
+    $: if (lang_primary === undefined || lang_primary === null) lang_primary = []
+
+    let lang_secondary = null
+    $: if (lang_secondary === undefined || lang_secondary === null) lang_secondary = []
+    let last_updated = null
+    let name = null
+    let surname = null
+    let birthdate = null
+    let gender_choice = null
+    let hair_color_choice = null
+    let skin_color_choice = null
+    let height = null
+    let agencies_choice = null
+    let all_lang_choice = null
+    let tags_choice = null
+    let tags = null
+    let phone = null
+    let all_cities = null
+    let insta = null
+    let facebook = null
+    let chest_size = null
+    let jacket_size = null
+    let trouser_size = null
+    let waist_size = null
+    let hip_size = null
+    let shoe_size = null
+    let eyes_color = null
+    let details = null
+    let email = null
+    let countries = null
+    let accept_body_modification = null
+    let accept_nude = null
+    let accept_figuration = null
 
     async function getProfile() {
         loading = true;
-        attributes = await getAttributes(user.id);
+        const user = supabase.auth.user();
+        const attributes = await getAttributes(user.id);
+        [
+            name,
+            surname,
+            birthdate,
+            insta,
+            facebook,
+            jacket_size,
+            trouser_size,
+            chest_size,
+            waist_size,
+            hip_size,
+            shoe_size,
+            eyes_color,
+            details,
+            height,
+            phone,
+            email,
+            gender,
+            gender_choice,
+            last_updated,
+            skin_color,
+            skin_color_choice,
+            hair_color,
+            hair_color_choice,
+            agencies,
+            agencies_choice,
+            countries,
+            cities,
+            all_cities,
+            locations,
+            all_lang_choice,
+            lang_primary,
+            lang_secondary,
+            tags,
+            tags_choice,
+            accept_body_modification,
+            accept_nude,
+            accept_figuration,
+        ] = Object.values(attributes)
         loading = false
     }
 
     async function updateProfile() {
         loading = true
-        await updateLanguages(attributes.lang_primary, attributes.lang_secondary, user.id)
-
-        let {error_delete_tags} = await supabase
-            .from('usertags')
-            .delete()
-            .eq('userid', user.id)
-
-        if (error_delete_tags) throw error_delete_tags
-
-
-        for (let tag of tags) {
-            // if tags does not exist create it:
-
-            // insert tags
-        }
-
-        // agencies
-        // delete all agencies of user
-
-        let {error_delete_agencies} = await supabase
-            .from('usersagency')
-            .delete()
-            .eq('userid', user.id)
-
-        if (error_delete_agencies) throw error_delete_agencies
-
-
+        const user = supabase.auth.user();
+        await updateLanguages(lang_primary, lang_secondary, user.id)
         try {
             const updates = {
                 id: user.id,
@@ -114,6 +166,7 @@
             loading = false
         }
     }
+
 
 </script>
 
