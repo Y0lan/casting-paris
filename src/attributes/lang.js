@@ -1,6 +1,5 @@
 import {supabase} from "../supabaseClient";
-import {runInContext as _} from "lodash";
-
+import _ from 'lodash';
 
 export const get_all_user_languages = async (userid) => {
 

@@ -5,6 +5,8 @@
     import Select from 'svelte-select';
     import {getAttributes} from "./attributes/get-attributes"
     import {updateLanguages} from "./attributes/lang";
+    import {updateAgencies} from "./attributes/agency";
+    import {updateTags} from "./attributes/tags";
 
     let loading = true;
 
@@ -33,6 +35,7 @@
 
     let lang_secondary = null
     $: if (lang_secondary === undefined || lang_secondary === null) lang_secondary = []
+
     let last_updated = null
     let name = null
     let surname = null
@@ -113,6 +116,8 @@
         loading = true
         const user = supabase.auth.user();
         await updateLanguages(lang_primary, lang_secondary, user.id)
+        await updateAgencies(agencies, user.id)
+        await updateTags(tags, user.id)
         try {
             const updates = {
                 id: user.id,
@@ -136,7 +141,7 @@
                 hair_color,
                 countries: locations.map((city) => city.split("-")[1].trim()),
                 cities: locations.map((city) => city.split("-")[0].trim()),
-                gender,
+                gender: gender.value ? gender.value : gender,
                 locations: locations,
                 last_updated: moment().tz("Europe/Paris").format("yyyy-MM-DD HH:mm:ss")
             }
@@ -359,6 +364,7 @@
                 type="text"
                 bind:value={details}/>
     </div>
+
 
     <div>
         <input type="submit" class="button block primary" value={loading ? 'Loading ...' : 'Confirm'}

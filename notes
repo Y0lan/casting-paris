@@ -5,19 +5,16 @@ modification corporel pour casting (oui / non / sans réponse)
 - nu ?
 - figuration ?
 
-un casté peux faire partie de plusieurs agences ENVOIE / SUPPRESSION NOT OK
-talent (sport, musique (chant,dance), théatre...) plsr sport ENVOIE / SUPPRESSION NOT OK
-
-10 langues les plus parlés au monde (qlq peux parler plusieurs langues) ENVOIE / SUPPRESSION NOT OK
-lang1 lang2
-suppression des doublons dans les langues
-
 upload photo to profile
 
 
 all number can't be negative
 phone number must be valid
+eyes color = multiple choice array
 
+régler problème timezone incorrecte
+
+ajout loading overlay when loading
 
 
 KRIS: QU'EST CE QUI EST OBLIGATOIRE?

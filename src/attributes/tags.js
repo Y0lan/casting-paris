@@ -41,3 +41,49 @@ export const get_all_tags = async () => {
         })
     }
 }
+
+const deleteTags = async (userid) => {
+    await supabase
+        .from('usertags')
+        .delete()
+        .eq("userid", userid)
+}
+
+const insertTag = async (tag, userid) => {
+    let tagid = tag.value
+    if (!await doesTagExist(tag)) {
+        tagid = await createTag(tag)
+    }
+    await supabase
+        .from('usertags')
+        .insert({
+            tagid,
+            userid
+        })
+}
+
+const createTag = async (tag) => {
+    const {data: newTag} = await supabase
+        .from('tags')
+        .insert(
+            {tagname: tag.label}
+        )
+        .single()
+    return newTag.id
+}
+
+const doesTagExist = async (tag) => {
+    const {data: foundTag} = await supabase
+        .from('tags')
+        .select('tagname')
+        .eq('tagname', tag.label)
+    return foundTag.length > 0
+}
+
+export const updateTags = async (tags, userid) => {
+    await deleteTags(userid)
+    tags = tags === undefined ? [] : tags
+    for (const tag of tags) {
+        await insertTag(tag, userid)
+    }
+}
