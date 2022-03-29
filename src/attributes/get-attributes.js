@@ -10,7 +10,7 @@ import {get_all_agencies, get_all_user_agency} from "./agency";
 import {get_all_tags, get_all_user_tags} from "./tags";
 import {get_all_languages, get_all_user_languages} from "./lang";
 import {supabase} from "../supabaseClient";
-import moment from "moment-timezone";
+import moment from "moment";
 
 export const get_user_info = async (userid) => {
     let {data, error, status} = await supabase

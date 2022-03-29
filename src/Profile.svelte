@@ -143,7 +143,7 @@
                 cities: locations.map((city) => city.split("-")[0].trim()),
                 gender: gender.value ? gender.value : gender,
                 locations: locations,
-                last_updated: moment().tz("Europe/Paris").format("yyyy-MM-DD HH:mm:ss")
+                last_updated: moment().format("yyyy-MM-DD HH:mm:ss")
             }
 
             let {error} = await supabase.from('users').upsert(updates,
