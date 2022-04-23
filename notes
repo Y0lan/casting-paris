@@ -1,9 +1,5 @@
 checkbox loi européen RGPD de la protéction des données
 
-modification corporel pour casting (oui / non / sans réponse)
-- coloration de cheveux ?
-- nu ?
-- figuration ?
 
 upload photo to profile
 
@@ -15,6 +11,7 @@ eyes color = multiple choice array
 régler problème timezone incorrecte
 
 ajout loading overlay when loading
+re organiser le formulaire
 
 
 KRIS: QU'EST CE QUI EST OBLIGATOIRE?

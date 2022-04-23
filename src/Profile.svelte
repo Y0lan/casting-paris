@@ -3,6 +3,7 @@
     import {user} from "./sessionStore";
     import moment from "moment-timezone";
     import Select from 'svelte-select';
+    import Switch from "svelte-switch";
     import {getAttributes} from "./attributes/get-attributes"
     import {updateLanguages} from "./attributes/lang";
     import {updateAgencies} from "./attributes/agency";
@@ -21,6 +22,10 @@
 
     let hair_color = null
     $: if (hair_color !== null) hair_color = hair_color.value ? hair_color.value : hair_color;
+
+    let eyes_color = null
+    $: if (eyes_color === undefined || eyes_color === null) eyes_color = [];
+    else eyes_color = eyes_color.map((color) => color.value ? color.value : color)
 
     let cities = null
     $: if (cities === undefined || cities === null) cities = [];
@@ -43,6 +48,7 @@
     let gender_choice = null
     let hair_color_choice = null
     let skin_color_choice = null
+    let eyes_color_choice = null
     let height = null
     let agencies_choice = null
     let all_lang_choice = null
@@ -58,13 +64,27 @@
     let waist_size = null
     let hip_size = null
     let shoe_size = null
-    let eyes_color = null
     let details = null
     let email = null
     let countries = null
-    let accept_body_modification = null
-    let accept_nude = null
-    let accept_figuration = null
+    let accept_body_modification;
+    $: console.log(accept_body_modification)
+
+    function setAcceptBodyModification(event) {
+        console.log(event)
+        const { checked } = event.detail;
+        accept_body_modification = checked;
+    }
+    let accept_nude;
+    function setAcceptNude(event) {
+        const { checked } = event.detail;
+        accept_nude = checked;
+    }
+    let accept_figuration;
+    function setAcceptFiguration(event) {
+        const { checked } = event.detail;
+        accept_figuration = checked;
+    }
 
     async function getProfile() {
         loading = true;
@@ -82,7 +102,6 @@
             waist_size,
             hip_size,
             shoe_size,
-            eyes_color,
             details,
             height,
             phone,
@@ -94,6 +113,8 @@
             skin_color_choice,
             hair_color,
             hair_color_choice,
+            eyes_color,
+            eyes_color_choice,
             agencies,
             agencies_choice,
             countries,
@@ -139,6 +160,9 @@
                 phone,
                 skin_color,
                 hair_color,
+                accept_figuration,
+                accept_body_modification,
+                accept_nude,
                 countries: locations.map((city) => city.split("-")[1].trim()),
                 cities: locations.map((city) => city.split("-")[0].trim()),
                 gender: gender.value ? gender.value : gender,
@@ -326,6 +350,18 @@
         />
     </div>
     <div>
+        <label>Accept Body Modification</label>
+        <Switch on:change={setAcceptBodyModification} checked={accept_body_modification} />
+    </div>
+    <div>
+        <label>Accept Nude</label>
+        <Switch on:change={setAcceptNude} checked={accept_nude} />
+    </div>
+    <div>
+        <label>Accept Figuration</label>
+        <Switch on:change={setAcceptFiguration} checked={accept_figuration} />
+    </div>
+    <div>
         <label for="waist_size">Waist size in cm</label>
         <input
                 id="waist_size"
@@ -351,11 +387,7 @@
     </div>
     <div>
         <label for="eyes_color">Eyes color</label>
-        <input
-                id="eyes_color"
-                type="text"
-                bind:value={eyes_color}
-        />
+        <Select id="eyes_color" isMulti=true items={eyes_color_choice} bind:value={eyes_color} />
     </div>
     <div>
         <label for="details">Details</label>
