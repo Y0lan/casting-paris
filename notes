@@ -13,5 +13,7 @@ régler problème timezone incorrecte
 ajout loading overlay when loading
 re organiser le formulaire
 
+le tri de photo se fait après chaque modele, kris branche son appareil, va appeler le modele suivant, debranche son appareil, et shoot,etc...
+
 
 KRIS: QU'EST CE QUI EST OBLIGATOIRE?
